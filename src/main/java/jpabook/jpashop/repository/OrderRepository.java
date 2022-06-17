@@ -82,4 +82,21 @@ public class OrderRepository {
     }
 
 
+    /**
+     * JPA 에서 distinct -> 2가지 기능 제공
+     * 1. SQL 에 distinct 구문 추가
+     * 2. 결과로 받아온 데이터에서 pk가 같은 데이터 중복 처리
+     *
+     * fetch join을 사용한 경우에 절대 페이징을 사용하면 안된다
+     * why? => sql 구문에는 페이징이 적용되지 않은 구문이 나간다. 그러므로 결과로 받아온 데이터를 메모리에 받아서 처리함
+     * => 만약에 결과로 받아온 데이터가 1,000,000개 라면 ..? 메모리 초과가 발생할 수 있다.
+     **/
+    public List<Order> findAllWithItem() {
+        return em.createQuery("select distinct o from Order o"+
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
 }
